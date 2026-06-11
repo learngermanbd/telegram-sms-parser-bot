@@ -825,6 +825,11 @@ async def main():
     ))
     application.add_error_handler(error_handler)
 
+    # Manually start the application (avoids event loop conflict with run_polling)
+    await application.initialize()
+    await application.start()
+    await application.updater.start_polling()
+
     # Cache bot instance for background tasks
     global _bot_instance
     _bot_instance = application.bot
@@ -838,11 +843,20 @@ async def main():
     logger.info("Flask health-check on port %s", port)
     logger.info("SMS Parser Bot started - listening %s, forwarding to %s",
                 SOURCE_CHAT_ID_INT, DESTINATION_CHANNEL_ID_INT)
-    await application.run_polling()
+
+    # Keep running until interrupted
+    stop_signal = asyncio.Event()
+    try:
+        await stop_signal.wait()
+    except (KeyboardInterrupt, asyncio.CancelledError):
+        pass
+    finally:
+        await application.updater.stop()
+        await application.stop()
+        await application.shutdown()
 
 
 if __name__ == "__main__":
-    import asyncio
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
