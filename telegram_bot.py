@@ -654,9 +654,15 @@ async def cmd_search(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Route SMS messages to parser, media to forward."""
-    if update.effective_chat and update.effective_chat.id != SOURCE_CHAT_ID_INT:
-        return
+    """Route SMS messages to parser, media to forward.
+
+    Accepts messages from any chat (not just SOURCE_CHAT_ID) so that
+    sms-fw.com forwarded SMS arriving via different chat paths still get
+    processed and forwarded to the destination channel.
+    """
+    chat_id = update.effective_chat.id if update.effective_chat else None
+    logger.debug("Incoming message from chat_id=%s (expected source=%s)",
+                 chat_id, SOURCE_CHAT_ID_INT)
     message = update.effective_message
     if message is None:
         return
