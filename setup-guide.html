@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Telegram Bot — Setup & Workflow Guide</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f5f7fa;
+      color: #1a1a2e;
+      line-height: 1.7;
+      padding: 2rem 1rem;
+    }
+    .container { max-width: 880px; margin: 0 auto; }
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.3rem;
+      background: linear-gradient(135deg, #0088cc, #25a3e0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle { font-size: 1.1rem; color: #555; margin-bottom: 2rem; }
+    h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    h2 .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #0088cc;
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    p, li { color: #333; }
+    a { color: #0088cc; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .step {
+      background: #fff;
+      border-radius: 14px;
+      padding: 1.8rem 2rem;
+      margin-bottom: 1.6rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+    }
+    .step:hover { box-shadow: 0 4px 16px rgba(0,136,204,0.1); }
+    .step p { margin: 0.5rem 0; }
+    .step ul, .step ol { padding-left: 1.4rem; margin: 0.5rem 0; }
+    .step li { margin: 0.3rem 0; }
+
+    /* Workflow diagram */
+    .workflow {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin: 1.5rem 0;
+      padding: 1.5rem;
+      background: #f0f8ff;
+      border-radius: 12px;
+      border: 1px solid #c0dceb;
+    }
+    .wf-box {
+      background: #fff;
+      border: 2px solid #0088cc;
+      border-radius: 10px;
+      padding: 0.8rem 1.2rem;
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 600;
+      min-width: 100px;
+    }
+    .wf-box .wf-icon { font-size: 1.5rem; display: block; margin-bottom: 0.3rem; }
+    .wf-box.sms { border-color: #8e44ad; }
+    .wf-box.parse { border-color: #e67e22; }
+    .wf-box.filter { border-color: #e74c3c; }
+    .wf-box.template { border-color: #27ae60; }
+    .wf-box.channel { border-color: #0088cc; }
+    .wf-arrow { font-size: 1.4rem; color: #999; }
+    .wf-label {
+      width: 100%;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #888;
+      margin-top: 0.3rem;
+    }
+
+    /* Provider badges */
+    .provider-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 0.8rem 0;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+    .badge.bkash { background: #e74c3c; color: #fff; }
+    .badge.nagad { background: #e67e22; color: #fff; }
+    .badge.rocket { background: #2980b9; color: #fff; }
+
+    /* Mock screenshot boxes */
+    .mock-screenshot {
+      border: 1px solid #d0d7de;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 0.8rem 0;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .mock-screenshot .mock-header {
+      background: #f0f2f5;
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+      color: #555;
+      border-bottom: 1px solid #d0d7de;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .mock-screenshot .mock-header .dot {
+      width: 10px; height: 10px; border-radius: 50%; display: inline-block;
+    }
+    .mock-screenshot .mock-header .dot.red { background: #ff5f56; }
+    .mock-screenshot .mock-header .dot.yellow { background: #ffbd2e; }
+    .mock-screenshot .mock-header .dot.green { background: #27c93f; }
+    .mock-screenshot .mock-body {
+      padding: 1.5rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .mock-screenshot .mock-body .telegram-icon { width: 48px; height: 48px; }
+    .mock-screenshot .mock-body .mock-chat {
+      background: #f0f2f5; border-radius: 8px; padding: 0.6rem 1rem;
+      font-size: 0.85rem; color: #222; max-width: 80%; text-align: left;
+      font-family: 'Courier New', monospace;
+    }
+    .mock-screenshot .mock-body .mock-reply {
+      background: #e8f4fd; border-radius: 8px; padding: 0.6rem 1rem;
+      font-size: 0.85rem; color: #222; max-width: 80%; text-align: left;
+    }
+    .mock-screenshot .mock-footer {
+      background: #f8f9fa; padding: 0.4rem 1rem; font-size: 0.7rem;
+      color: #999; border-top: 1px solid #d0d7de; text-align: center;
+    }
+
+    /* Template preview */
+    .template-preview {
+      border: 1px solid #d0d7de;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 0.8rem 0;
+      background: #1a1a2e;
+    }
+    .template-preview .tp-header {
+      background: #2a2a3e;
+      padding: 0.4rem 1rem;
+      font-size: 0.75rem;
+      color: #aaa;
+      border-bottom: 1px solid #3a3a4e;
+    }
+    .template-preview .tp-body {
+      padding: 1rem 1.2rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      color: #e4e4ef;
+      white-space: pre-wrap;
+    }
+
+    pre {
+      background: #1a1a2e; color: #e4e4ef; padding: 1rem 1.2rem;
+      border-radius: 10px; overflow-x: auto; font-size: 0.88rem;
+      font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace; margin: 0.8rem 0;
+    }
+    code {
+      font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+      font-size: 0.88em; background: #eef1f5; padding: 0.15em 0.4em; border-radius: 4px;
+    }
+    pre code { background: transparent; padding: 0; border-radius: 0; }
+
+    .info { background: #e8f4fd; border-left: 4px solid #0088cc; padding: 0.8rem 1rem; border-radius: 0 8px 8px 0; margin: 0.8rem 0; font-size: 0.9rem; }
+    .info strong { color: #0088cc; }
+    .warning { background: #fff3e0; border-left: 4px solid #f39c12; padding: 0.8rem 1rem; border-radius: 0 8px 8px 0; margin: 0.8rem 0; font-size: 0.9rem; }
+    .tip { background: #e8f8e8; border-left: 4px solid #27ae60; padding: 0.8rem 1rem; border-radius: 0 8px 8px 0; margin: 0.8rem 0; font-size: 0.9rem; }
+
+    .footer { text-align: center; margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid #ddd; font-size: 0.85rem; color: #888; }
+
+    @media (max-width: 600px) {
+      body { padding: 1rem 0.6rem; }
+      .step { padding: 1.2rem 1rem; }
+      h1 { font-size: 1.6rem; }
+      .mock-screenshot .mock-body .mock-chat,
+      .mock-screenshot .mock-body .mock-reply { max-width: 95%; }
+      .wf-box { min-width: 70px; padding: 0.5rem 0.8rem; font-size: 0.75rem; }
+      .wf-arrow { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <h1>🤖 Telegram SMS Parser Bot</h1>
+  <p class="subtitle">
+    Setup &amp; workflow guide &mdash; automatically parses SMS messages (bKash, NAGAD, Rocket) and sends formatted templates to your private channel.
+  </p>
+
+  <!-- ============== WORKFLOW OVERVIEW ============== -->
+  <div class="step">
+    <h2>🧰 How It Works</h2>
+    <p>This bot receives forwarded SMS messages, intelligently parses transaction details, and sends <strong>structured templates</strong> to your private channel. No keyword list needed.</p>
+
+    <div class="workflow">
+      <div class="wf-box sms">
+        <span class="wf-icon">📱</span>
+        SMS Forwarder<br/>(sms-fw.com)
+      </div>
+      <span class="wf-arrow">🡆</span>
+      <div class="wf-box parse">
+        <span class="wf-icon">🔎</span>
+        Bot detects &amp;<br/>parses transaction
+      </div>
+      <span class="wf-arrow">🡆</span>
+      <div class="wf-box filter">
+        <span class="wf-icon">🛡️</span>
+        Security filter<br/>(blocks OTPs/PINs)
+      </div>
+      <span class="wf-arrow">🡆</span>
+      <div class="wf-box template">
+        <span class="wf-icon">📋</span>
+        Formats into<br/>custom template
+      </div>
+      <span class="wf-arrow">🡆</span>
+      <div class="wf-box channel">
+        <span class="wf-icon">📨</span>
+        Sends to<br/>your channel
+      </div>
+      <div class="wf-label">🔄 Also saves to SQLite database for summaries &amp; search 🔄</div>
+    </div>
+
+    <p><strong>Supported providers:</strong></p>
+    <div class="provider-badges">
+      <span class="badge bkash">bKash</span>
+      <span class="badge nagad">NAGAD</span>
+      <span class="badge rocket">Rocket / Nexus Pay</span>
+    </div>
+
+    <p>The bot automatically detects whether a message is a <strong>Cash Out</strong> or <strong>Money Received</strong> transaction and formats it accordingly. Unrecognized messages are forwarded as raw text with a generic prefix.</p>
+    <p><strong>Security filter:</strong> OTPs, passwords, PINs, CVVs, 2FA codes, recovery codes, and similar sensitive content are silently blocked — they never reach the channel.</p>
+    <p><strong>Transaction database:</strong> Every parsed transaction is saved to a local SQLite database (<code>transactions.db</code>). You can query it anytime with commands.</p>
+    <p><strong>No .env file needed</strong> — all config lives directly in <code>telegram_bot.py</code>.</p>
+  </div>
+
+  <!-- ============== PREREQUISITES ============== -->
+  <div class="step">
+    <h2>📋 Prerequisites</h2>
+    <ul>
+      <li><strong>Python 3.10+</strong> installed</li>
+      <li>A <strong>Telegram account</strong></li>
+      <li>A <strong>private Telegram channel</strong> to forward messages to</li>
+      <li>An <strong>SMS forwarding app</strong> (e.g. <a href="https://sms-fw.com" target="_blank">sms-fw.com</a>) on your phone</li>
+      <li>A <strong>Render account</strong> (free tier works) &mdash; <a href="https://dashboard.render.com/register" target="_blank">sign up</a></li>
+      <li><strong>Git</strong> &amp; a <strong>GitHub / GitLab</strong> repo</li>
+    </ul>
+  </div>
+
+  <!-- ============== STEP 1 ============== -->
+  <div class="step">
+    <h2><span class="step-num">1</span> Create a Telegram Bot</h2>
+    <ol>
+      <li>Open Telegram and search for <strong>@BotFather</strong>.</li>
+      <li>Send: <code>/newbot</code></li>
+      <li>Choose a <strong>name</strong> (e.g. <em>SMS Parser Bot</em>) and a <strong>username</strong> ending in <code>bot</code>.</li>
+      <li>@BotFather replies with your <strong>HTTP API token</strong>. Save it — this is your <code>BOT_TOKEN</code>.</li>
+    </ol>
+    <div class="info"><strong>💡 Tip:</strong> Token format: <code>123456789:ABCdefGHIjklmNOPqrstUVwxyz</code></div>
+
+    <p style="margin-top:1rem; font-weight:600; font-size:0.9rem; color:#0088cc;">📸 Screenshot &mdash; @BotFather conversation:</p>
+    <div class="mock-screenshot">
+      <div class="mock-header">
+        <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+        <span style="margin-left:0.6rem;">📱 Telegram Desktop &mdash; @BotFather</span>
+      </div>
+      <div class="mock-body">
+        <svg class="telegram-icon" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.08-.8 3.72-1.13 4.94-.14.52-.42.7-.7.72-.56.04-.98-.36-1.52-.7-.87-.58-1.37-.94-2.22-1.5-.98-.65-.35-1.01.22-1.59.15-.15 2.72-2.5 2.77-2.71.01-.03.02-.14-.05-.2s-.16-.05-.22-.03c-.1.03-1.92 1.22-5.4 3.57-.5.35-.96.52-1.37.51-.44-.01-1.3-.25-1.94-.46-.78-.26-1.4-.4-1.35-.84.03-.23.34-.47.95-.72 3.74-1.63 6.24-2.7 7.5-3.22 3.56-1.47 4.3-1.73 4.78-1.73.11 0 .34.02.5.16.12.11.15.25.17.36.02.1.04.33.01.53z" fill="#0088cc"/>
+        </svg>
+        <div class="mock-chat"><strong>You:</strong> /newbot</div>
+        <div class="mock-reply"><strong>BotFather:</strong> Alright, a new bot. How are we going to call it?</div>
+        <div class="mock-chat"><strong>You:</strong> SMS Parser Bot</div>
+        <div class="mock-reply"><strong>BotFather:</strong> Good. Now choose a username. It must end in <code>bot</code>.</div>
+        <div class="mock-chat"><strong>You:</strong> SMSparserBot</div>
+        <div class="mock-reply">
+          <strong>BotFather:</strong> Done! Use this token:<br/>
+          <code style="background:#f5f5f5;">123456789:ABCdefGHIjklmNOPqrstUVwxyz</code>
+        </div>
+      </div>
+      <div class="mock-footer">Replace with your actual screenshot of the @BotFather conversation</div>
+    </div>
+    <p><strong>✅ Result:</strong> You have a <code>BOT_TOKEN</code>.</p>
+  </div>
+
+  <!-- ============== STEP 2 ============== -->
+  <div class="step">
+    <h2><span class="step-num">2</span> Get Your Chat ID</h2>
+    <p>The bot listens in your <strong>private chat</strong> with it. Your SMS forwarder will send messages to this chat, and the bot will read them there.</p>
+    <ol>
+      <li>Open a chat with your new bot and send any message (e.g. "hi").</li>
+      <li>Visit in your browser:<br/>
+        <code>https://api.telegram.org/bot&lt;YOUR_BOT_TOKEN&gt;/getUpdates</code></li>
+      <li>Find the <code>"chat":{"id": ...}</code> field. That number is your <code>SOURCE_CHAT_ID</code>.</li>
+    </ol>
+    <div class="info"><strong>💡 Tip:</strong> Your personal chat ID is usually a positive number like <code>123456789</code>.</div>
+
+    <p style="margin-top:1rem; font-weight:600; font-size:0.9rem; color:#0088cc;">📸 Screenshot &mdash; Browser showing <code>getUpdates</code> JSON:</p>
+    <div class="mock-screenshot">
+      <div class="mock-header">
+        <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+        <span style="margin-left:0.6rem;">🌐 Browser &mdash; api.telegram.org</span>
+      </div>
+      <div class="mock-body" style="font-family:'Courier New',monospace; font-size:0.8rem; text-align:left; align-items:stretch;">
+        <pre style="background:#f8f9fa; color:#1a1a2e; padding:0.8rem; border-radius:6px; white-space:pre-wrap; word-break:break-all; margin:0;">{
+  "ok": true,
+  "result": [
+    {
+      "update_id": 123456789,
+      "message": {
+        "message_id": 1,
+        "from": {"id": <span style="background:#fff3cd; padding:0 0.2rem;">123456789</span>, ...},
+        "chat": {
+          "id": <span style="background:#fff3cd; padding:0 0.2rem;">123456789</span>,
+          "type": "private"
+        },
+        "text": "hi"
+      }
+    }
+  ]
+}</pre>
+        <p style="font-size:0.8rem; color:#888; margin:0;">👆 The <code>chat.id</code> (same as <code>from.id</code>) is your <code>SOURCE_CHAT_ID</code></p>
+      </div>
+      <div class="mock-footer">Replace with your actual screenshot</div>
+    </div>
+    <p><strong>✅ Result:</strong> You have a <code>SOURCE_CHAT_ID</code>.</p>
+  </div>
+
+  <!-- ============== STEP 3 ============== -->
+  <div class="step">
+    <h2><span class="step-num">3</span> Get the Channel ID</h2>
+    <ol>
+      <li>Add your bot as an <strong>administrator</strong> to your private channel.</li>
+      <li>Post any message in the channel.</li>
+      <li>Refresh: <code>https://api.telegram.org/bot&lt;YOUR_BOT_TOKEN&gt;/getUpdates</code></li>
+      <li>Find the <code>"channel_post"</code> section with the channel's <code>"id"</code> (e.g. <code>-1002345678901</code>).</li>
+    </ol>
+    <div class="warning"><strong>⚠️ Important:</strong> Bot must be <strong>admin</strong> of the channel, not just a member.</div>
+
+    <p style="margin-top:1rem; font-weight:600; font-size:0.9rem; color:#0088cc;">📸 Screenshot &mdash; Channel ID in JSON:</p>
+    <div class="mock-screenshot">
+      <div class="mock-header">
+        <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+        <span style="margin-left:0.6rem;">🌐 Browser &mdash; second update</span>
+      </div>
+      <div class="mock-body" style="font-family:'Courier New',monospace; font-size:0.8rem; text-align:left; align-items:stretch;">
+        <pre style="background:#f8f9fa; color:#1a1a2e; padding:0.8rem; border-radius:6px; white-space:pre-wrap; word-break:break-all; margin:0;">{
+  "ok": true,
+  "result": [
+    { ... (your private message) ... },
+    {
+      "update_id": 987654321,
+      "channel_post": {
+        "message_id": 1,
+        "chat": {
+          <span style="background:#fff3cd; padding:0 0.2rem;">"id": -1002345678901,</span>
+          "title": "My Private Channel",
+          "type": "channel"
+        },
+        "text": "test"
+      }
+    }
+  ]
+}</pre>
+        <p style="font-size:0.8rem; color:#888; margin:0;">👆 The <code>"id"</code> in <code>channel_post</code> is <code>DESTINATION_CHANNEL_ID</code></p>
+      </div>
+      <div class="mock-footer">Replace with your actual screenshot</div>
+    </div>
+    <p><strong>✅ Result:</strong> You have all three values: <code>BOT_TOKEN</code>, <code>SOURCE_CHAT_ID</code>, <code>DESTINATION_CHANNEL_ID</code>.</p>
+  </div>
+
+  <!-- ============== STEP 4 ============== -->
+  <div class="step">
+    <h2><span class="step-num">4</span> Edit Config in telegram_bot.py</h2>
+    <p>Open <code>telegram_bot.py</code> in any text editor. At the top, you'll see:</p>
+    <pre><code># ---------------------------------------------------------------------------
+# 1. CONFIGURATION  --  EDIT THESE VALUES
+# ---------------------------------------------------------------------------
+
+BOT_TOKEN: Final[str] = "YOUR_BOT_TOKEN_HERE"
+SOURCE_CHAT_ID: Final[str] = "YOUR_CHAT_ID_HERE"
+DESTINATION_CHANNEL_ID: Final[str] = "YOUR_CHANNEL_ID_HERE"</code></pre>
+    <p>Replace the placeholder strings with the real values from Steps 1-3:</p>
+    <pre><code>BOT_TOKEN: Final[str] = "123456789:ABCdefGHIjklmNOPqrstUVwxyz"
+SOURCE_CHAT_ID: Final[str] = "123456789"
+DESTINATION_CHANNEL_ID: Final[str] = "-1002345678901"</code></pre>
+    <div class="info"><strong>💡 No .env file needed!</strong> All config is right in the script. The validation check will warn you if you forget to edit any placeholder.</div>
+  </div>
+
+  <!-- ============== STEP 5 ============== -->
+  <div class="step">
+    <h2><span class="step-num">5</span> Configure SMS Forwarding (sms-fw.com)</h2>
+    <p>You need an SMS forwarding app on your phone that sends SMS messages to your bot's private chat. <a href="https://sms-fw.com" target="_blank">sms-fw.com</a> is a popular choice.</p>
+    <ol>
+      <li>
+        <strong>Install SMS Forwarder</strong> — Download <a href="https://sms-fw.com" target="_blank">sms-fw.com</a> on your Android phone (or use any SMS forwarding app that supports Telegram).</li>
+      <li>
+        <strong>Set up Telegram forwarding:</strong>
+        <ul>
+          <li>In the app, add a new forwarding rule.</li>
+          <li>Select <strong>Telegram</strong> as the target.</li>
+          <li>Enter your bot's username (e.g. <code>@SMSparserBot</code>).</li>
+          <li>Start a private chat with your bot first, then forward a test SMS.</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Filter by sender:</strong> Create rules for each provider:
+        <ul>
+          <li>Rule for <strong>bKash</strong> — forward messages from "bKash" or "16216"</li>
+          <li>Rule for <strong>NAGAD</strong> — forward messages from "NAGAD"</li>
+          <li>Rule for <strong>Rocket / Nexus Pay</strong> — forward messages from "Rocket" or related numbers</li>
+          <li><em>Optional:</em> Add an "all SMS" rule (the bot filters OTPs/PINs automatically)</li>
+        </ul>
+      </li>
+    </ol>
+    <div class="warning"><strong>⚠️ Important:</strong> The SMS forwarder sends messages to the <strong>same private chat</strong> with the bot you tested in Step 2. Make sure <code>SOURCE_CHAT_ID</code> matches that chat.</div>
+    <div class="tip"><strong>✅ Tip:</strong> Send a test SMS to yourself and verify the formatted template appears in your channel before deploying.</div>
+  </div>
+
+  <!-- ============== STEP 6 ============== -->
+  <div class="step">
+    <h2><span class="step-num">6</span> Install &amp; Test Locally</h2>
+    <pre><code>pip install -r requirements.txt
+python telegram_bot.py</code></pre>
+    <p>You should see:</p>
+    <pre><code>INFO:__main__:Bot started — listening to chat 123456789, forwarding to -1002345678901
+INFO:__main__:Flask health-check on port 8080
+INFO:__main__:Scheduled summary loop started (daily 1AM BDT, weekly Sun 1AM BDT)</code></pre>
+    <p><strong>Test:</strong></p>
+    <ol>
+      <li>Send a <strong>bKash SMS</strong> to the bot in your private chat (paste a sample like the ones below).</li>
+      <li>The bot will parse it and send a <strong>formatted BKASH template</strong> to your channel.</li>
+    </ol>
+
+    <p style="font-weight:600; margin-top:1rem;">📋 Example — what the channel receives:</p>
+    <div class="template-preview">
+      <div class="tp-header">📨 BKASH — Formatted Template</div>
+      <div class="tp-body">From: BKASH
+Time: 10:33:37 PM
+Date: 11/06/2026
+Trx ID: DFB6898VEG
+Amount: 60 TK
+Last Number: 0161XXXX420
+
+****
+Cash Out Tk 60.00 from 0161XXXX420 successful. Fee Tk 0.00. Balance Tk ****. TrxID DFB6898VEG at 11/06/2026 22:33</div>
+    </div>
+
+    <p><strong>Test the commands:</strong></p>
+    <ul>
+      <li>Send <code>/daily</code> to see today's transaction summary</li>
+      <li>Send <code>/weekly</code> to see this week's summary</li>
+      <li>Send <code>/search DFB6898VEG</code> to find a transaction by Trx ID</li>
+      <li>Send <code>/search amount 60</code> to find transactions by amount</li>
+    </ul>
+
+    <div class="info"><strong>📊 Auto-summary:</strong> Every day at <strong>1:00 AM BDT</strong>, the bot sends a daily summary. Every <strong>Sunday at 1:00 AM BDT</strong>, it sends a weekly summary — both directly to the channel.</div>
+    <div class="tip"><strong>✅ Success?</strong> Press <code>Ctrl+C</code> to stop, then deploy!</div>
+  </div>
+
+  <!-- ============== STEP 7 ============== -->
+  <div class="step">
+    <h2><span class="step-num">7</span> Deploy to Render</h2>
+    <p>The <code>render.yaml</code> Blueprint makes it one-click:</p>
+    <ol>
+      <li>
+        <strong>Push to GitHub / GitLab</strong>
+        <pre><code>git add .
+git commit -m "Add Telegram SMS parser bot"
+git push</code></pre>
+      </li>
+      <li>Log into <a href="https://dashboard.render.com" target="_blank">render.com</a>.</li>
+      <li>Click <strong>"New +"</strong> → <strong>"Blueprint"</strong>.</li>
+      <li>Connect your repo — Render auto-detects <code>render.yaml</code>. Click <strong>"Apply"</strong>.</li>
+      <li><strong>Enter the secrets</strong> (<code>BOT_TOKEN</code>, <code>SOURCE_CHAT_ID</code>, <code>DESTINATION_CHANNEL_ID</code>) when prompted.</li>
+      <li>Click <strong>"Deploy"</strong>. Wait 2-3 minutes.</li>
+    </ol>
+    <div class="info">
+      <strong>📡 Health check:</strong> Render pings <code>/health</code> every few seconds, keeping the bot awake 24/7.
+    </div>
+    <div class="warning"><strong>⚠️ Note:</strong> The SQLite database (<code>transactions.db</code>) is ephemeral on Render — it resets on each deploy. For persistent storage, databases like <strong>Supabase</strong> or <strong>Railway</strong> are better suited.</div>
+    <p><strong>✅ Your bot is live!</strong> SMS messages forwarded to your bot are automatically parsed and sent to your channel as formatted templates.</p>
+  </div>
+
+  <!-- ============== COMMANDS REFERENCE ============== -->
+  <div class="step">
+    <h2>🎮 Commands Reference</h2>
+    <p>Send these commands in your private chat with the bot (not the channel):</p>
+    <div style="overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse; font-size:0.88rem; margin:0.5rem 0;">
+        <tr style="background:#f0f2f5;">
+          <th style="text-align:left; padding:0.5rem 0.8rem; border-bottom:2px solid #d0d7de;">Command</th>
+          <th style="text-align:left; padding:0.5rem 0.8rem; border-bottom:2px solid #d0d7de;">Description</th>
+        </tr>
+        <tr>
+          <td style="padding:0.5rem 0.8rem; border-bottom:1px solid #eef1f5;"><code>/daily</code></td>
+          <td style="padding:0.5rem 0.8rem; border-bottom:1px solid #eef1f5;">Shows today's transaction summary (count &amp; total per provider)</td>
+        </tr>
+        <tr style="background:#fafbfc;">
+          <td style="padding:0.5rem 0.8rem; border-bottom:1px solid #eef1f5;"><code>/weekly</code></td>
+          <td style="padding:0.5rem 0.8rem; border-bottom:1px solid #eef1f5;">Shows this week's transaction summary (last 7 days)</td>
+        </tr>
+        <tr>
+          <td style="padding:0.5rem 0.8rem; border-bottom:1px solid #eef1f5;"><code>/search &lt;TrxID&gt;</code></td>
+          <td style="padding:0.5rem 0.8rem; border-bottom:1px solid #eef1f5;">Search transactions by Trx ID (partial match)</td>
+        </tr>
+        <tr style="background:#fafbfc;">
+          <td style="padding:0.5rem 0.8rem; border-bottom:1px solid #eef1f5;"><code>/search amount &lt;amount&gt;</code></td>
+          <td style="padding:0.5rem 0.8rem; border-bottom:1px solid #eef1f5;">Search transactions by amount (e.g. <code>/search amount 60</code>)</td>
+        </tr>
+        <tr>
+          <td style="padding:0.5rem 0.8rem;"><code>/start</code></td>
+          <td style="padding:0.5rem 0.8rem;">Shows a brief welcome message with available commands</td>
+        </tr>
+      </table>
+    </div>
+    <div class="tip"><strong>💡 Search tip:</strong> After <code>/search</code> returns a numbered list, <strong>reply</strong> with the number (1, 2, ...) to see the full formatted template for that transaction.</div>
+  </div>
+
+  <!-- ============== TEMPLATE EXAMPLES ============== -->
+  <div class="step">
+    <h2>📄 Template Examples</h2>
+    <p>These are the exact formats the bot sends to your channel for each supported provider:</p>
+
+    <p style="font-weight:600; margin-top:1rem; color:#e74c3c;">🏦 bKash Template</p>
+    <div class="template-preview">
+      <div class="tp-header">📨 BKASH — Cash Out</div>
+      <div class="tp-body">From: BKASH
+Time: 10:33:37 PM
+Date: 11/06/2026
+Trx ID: DFB6898VEG
+Amount: 60 TK
+Last Number: 0161XXXX420
+
+****
+Cash Out Tk 60.00 from 0161XXXX420 successful. Fee Tk 0.00. Balance Tk ****. TrxID DFB6898VEG at 11/06/2026 22:33</div>
+    </div>
+
+    <p style="font-weight:600; margin-top:1rem; color:#e67e22;">🟠 NAGAD Template</p>
+    <div class="template-preview">
+      <div class="tp-header">📨 NAGAD — Cash Out</div>
+      <div class="tp-body">From: NAGAD
+Time: 9:33:09 PM
+Date: 11/06/2026
+Trx ID: 75I3XRF0
+Amount: 60 TK
+Last Number: 013****4227
+
+****
+Cash Out Received.
+Amount: Tk 60.00
+Customer: 013****4227
+TxnID: 75I3XRF0
+Comm: Tk 0.24
+Balance: Tk 2378.56
+11/06/2026 21:33</div>
+    </div>
+
+    <p style="font-weight:600; margin-top:1rem; color:#2980b9;">🚀 Rocket / Nexus Pay Template</p>
+    <div class="template-preview">
+      <div class="tp-header">📨 ROCKET — Money Received</div>
+      <div class="tp-body">From: ROCKET
+Time: 5:49:19 PM
+Date: 29/05/2026
+Trx ID: 6577612073
+Amount: 60 TK
+A/C :   ***439
+
+****
+Tk60.00 received from A/C:***439 Fee:Tk0,
+Your A/C Balance: Tk878.08
+TxnId:6577612073
+Date:29-MAY-26 05:49:19 pm.</div>
+    </div>
+    <div class="info"><strong>🔒 Security:</strong> Balance amounts are masked with <code>****</code> in bKash templates for privacy. Unrecognized messages are forwarded as plain text with a generic prefix.</div>
+  </div>
+
+  <!-- ============== TROUBLESHOOTING ============== -->
+  <div class="step">
+    <h2>🚧 Troubleshooting</h2>
+    <ul>
+      <li><strong>Bot not responding:</strong> Make sure <code>SOURCE_CHAT_ID</code> matches your personal chat ID (not a group ID). Send any message to the bot and check <code>/getUpdates</code>.</li>
+      <li><strong>Messages not reaching channel:</strong> Verify the bot is an <strong>admin</strong> of the destination channel (not just a member).</li>
+      <li><strong>"FATAL: You must edit..."</strong>: You forgot to replace a placeholder in <code>telegram_bot.py</code>. Search for "YOUR_" in the file and replace all matching strings.</li>
+      <li><strong>Message forwarded but showing as raw text (not parsed):</strong> The SMS format may differ from the parser's expectations. Check the bot's logs — the parser prints which service it detected or why it failed. You can add new regex patterns to the parser if needed.</li>
+      <li><strong>OTP / password not showing up in channel:</strong> This is working as intended! The security filter blocks sensitive messages. Check the bot logs for <code>"🔒 Blocked: sensitive content"</code> warnings.</li>
+      <li><strong>Search returning no results:</strong> Only messages that were successfully <em>parsed</em> are saved to the database. Raw/unrecognized forwards are not stored.</li>
+      <li><strong>Commands not working (/daily, /search):</strong> Send commands in your <strong>private chat with the bot</strong>, not in the channel.</li>
+      <li><strong>Database empty on Render:</strong> Render's filesystem is ephemeral. On restart/deploy, <code>transactions.db</code> resets. Consider persistent storage (Supabase) for long-term history.</li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    <p>Telegram SMS Parser Bot &mdash; python-telegram-bot / Flask / SQLite / Render</p>
+  </div>
+
+</div>
+</body>
+</html>

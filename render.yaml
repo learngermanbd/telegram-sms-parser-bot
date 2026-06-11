@@ -1,0 +1,52 @@
+# render.yaml - Render Blueprint (Infrastructure as Code)
+# =======================================================
+# Deploy the Telegram Message Forwarder Bot as a Web Service.
+#
+# How to use:
+#   1. Push this file to the root of your GitHub/GitLab repo.
+#   2. In the Render Dashboard, click "New +" -> "Blueprint".
+#   3. Connect your repo - Render auto-detects this file and
+#      provisions the service.
+#   4. Fill in the secret env vars (BOT_TOKEN, SOURCE_CHAT_ID,
+#      DESTINATION_CHANNEL_ID) when prompted.
+#
+# Docs: https://render.com/docs/blueprint-spec
+# =======================================================
+
+services:
+  # -------------------------------------------------------------------
+  # Web Service - runs the bot (Flask health-check + Telegram polling)
+  # -------------------------------------------------------------------
+  - type: web
+    name: telegram-forwarder-bot
+    runtime: python
+
+    # ---- Instance & Region ----
+    plan: free                          # Free tier (spins down after inactivity)
+    region: oregon                      # Pick the closest region to your users
+
+    # ---- Build & Start ----
+    buildCommand: pip install -r requirements.txt
+    startCommand: python telegram_bot.py
+
+    # ---- Health Checks ----
+    # Render pings this endpoint every ~5 seconds. As long as Flask
+    # responds 200, the service is considered healthy and won't restart.
+    healthCheckPath: /health
+
+    # ---- Environment Variables ----
+    # The three critical secrets are defined with sync: false so they
+    # are NEVER stored in your repo.  You will be prompted for their
+    # values in the Render Dashboard after the first Blueprint sync.
+    #
+    # PORT is injected automatically by Render - the bot already reads
+    # os.getenv("PORT", 8080) so no manual override is needed.
+    envVars:
+      - key: BOT_TOKEN
+        sync: false                     # Enter your @BotFather token here
+      - key: SOURCE_CHAT_ID
+        sync: false                     # Numeric ID of the chat to read from
+      - key: DESTINATION_CHANNEL_ID
+        sync: false                     # Numeric ID of the channel to forward to
+      - key: PYTHONUNBUFFERED
+        value: "1"                      # Stream logs in real-time to Render
