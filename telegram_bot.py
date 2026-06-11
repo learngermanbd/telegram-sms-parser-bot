@@ -36,15 +36,25 @@ from telegram.ext import (
 )
 
 # ---------------------------------------------------------------------------
-# 1. CONFIGURATION  --  EDIT THESE VALUES
+# 1. CONFIGURATION  --  EDIT THESE VALUES or set environment variables
 # ---------------------------------------------------------------------------
+#
+# The bot reads from environment variables first (Render secrets), falling
+# back to the hardcoded values below for local development.
+#
+# Render secrets (set in Dashboard):
+#   BOT_TOKEN, SOURCE_CHAT_ID, DESTINATION_CHANNEL_ID
+#
+# Local testing: edit the values below OR set the same env vars in your shell.
 
-BOT_TOKEN: Final[str] = "YOUR_BOT_TOKEN_HERE"
-SOURCE_CHAT_ID: Final[str] = "YOUR_CHAT_ID_HERE"
-DESTINATION_CHANNEL_ID: Final[str] = "YOUR_CHANNEL_ID_HERE"
+BOT_TOKEN: Final[str] = os.getenv("BOT_TOKEN", "8742421744:AAG82T3SaWv0kR68bf0BeOyczs87tc46pGQ")
+SOURCE_CHAT_ID: Final[str] = os.getenv("SOURCE_CHAT_ID", "1898023864")
+DESTINATION_CHANNEL_ID: Final[str] = os.getenv("DESTINATION_CHANNEL_ID", "-1003914671463")
 
 if "YOUR_" in BOT_TOKEN or "YOUR_" in SOURCE_CHAT_ID or "YOUR_" in DESTINATION_CHANNEL_ID:
-    print("FATAL: Edit BOT_TOKEN, SOURCE_CHAT_ID, DESTINATION_CHANNEL_ID in the script.")
+    print("FATAL: Set BOT_TOKEN, SOURCE_CHAT_ID, and DESTINATION_CHANNEL_ID")
+    print("   Option 1: Set them as environment variables")
+    print("   Option 2: Edit the fallback values in Section 1 of telegram_bot.py")
     sys.exit(1)
 
 try:
