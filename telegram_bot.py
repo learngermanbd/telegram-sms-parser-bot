@@ -661,7 +661,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     processed and forwarded to the destination channel.
     """
     chat_id = update.effective_chat.id if update.effective_chat else None
-    logger.debug("Incoming message from chat_id=%s (expected source=%s)",
+    logger.info("Incoming message from chat_id=%s (expected source=%s)",
                  chat_id, SOURCE_CHAT_ID_INT)
     message = update.effective_message
     if message is None:
